@@ -191,7 +191,7 @@ func (w *worker) fetchJob() (*Job, error) {
 
 func (w *worker) processJob(job *Job) {
 	if job.Unique {
-		updatedJob := w.getAndDeleteUniqueJob(job)
+		updatedJob := w.GetAndDeleteUniqueJob(job)
 		// This is to support the old way of doing it, where we used the job off the queue and just deleted the unique key
 		// Going forward the job on the queue will always be just a placeholder, and we will be replacing it with the
 		// updated job extracted here
@@ -211,15 +211,15 @@ func (w *worker) processJob(job *Job) {
 		w.observeDone(job.Name, job.ID, runErr)
 	}
 
-	fate := terminateOnly
+	fate := TerminateOnly
 	if runErr != nil {
 		job.failed(runErr)
-		fate = w.jobFate(jt, job)
+		fate = w.JobFate(jt, job)
 	}
-	w.removeJobFromInProgress(job, fate)
+	w.RemoveJobFromInProgress(job, fate)
 }
 
-func (w *worker) getAndDeleteUniqueJob(job *Job) *Job {
+func (w *worker) GetAndDeleteUniqueJob(job *Job) *Job {
 	var uniqueKey string
 	var err error
 
@@ -264,7 +264,85 @@ func (w *worker) getAndDeleteUniqueJob(job *Job) *Job {
 	return jobWithArgs
 }
 
-func (w *worker) removeJobFromInProgress(job *Job, fate terminateOp) {
+func (w *worker) GetUniqueJob(job *Job) *Job {
+	var uniqueKey string
+	var err error
+
+	if job.UniqueKey != "" {
+		uniqueKey = job.UniqueKey
+	} else { // For jobs put in queue prior to this change. In the future this can be deleted as there will always be a UniqueKey
+		uniqueKey, err = redisKeyUniqueJob(w.namespace, job.Name, job.Args)
+		if err != nil {
+			logError("worker.delete_unique_job.key", err)
+			return nil
+		}
+	}
+
+	conn := w.pool.Get()
+	defer conn.Close()
+
+	rawJSON, err := redis.Bytes(conn.Do("GET", uniqueKey))
+	if err != nil {
+		logError("worker.delete_unique_job.get", err)
+		return nil
+	}
+
+	// Previous versions did not support updated arguments and just set key to 1, so in these cases we should do nothing.
+	// In the future this can be deleted, as we will always be getting arguments from here
+	if string(rawJSON) == "1" {
+		return nil
+	}
+
+	// The job pulled off the queue was just a placeholder with no args, so replace it
+	jobWithArgs, err := newJob(rawJSON, job.dequeuedFrom, job.inProgQueue)
+	if err != nil {
+		logError("worker.delete_unique_job.updated_job", err)
+		return nil
+	}
+
+	return jobWithArgs
+}
+
+func (w *worker) UpdateUniqueJob(job *Job) *Job {
+	var uniqueKey string
+	var err error
+
+	if job.UniqueKey != "" {
+		uniqueKey = job.UniqueKey
+	} else { // For jobs put in queue prior to this change. In the future this can be deleted as there will always be a UniqueKey
+		uniqueKey, err = redisKeyUniqueJob(w.namespace, job.Name, job.Args)
+		if err != nil {
+			logError("worker.delete_unique_job.key", err)
+			return nil
+		}
+	}
+
+	conn := w.pool.Get()
+	defer conn.Close()
+
+	rawJSON, err := redis.Bytes(conn.Do("GET", uniqueKey))
+	if err != nil {
+		logError("worker.delete_unique_job.get", err)
+		return nil
+	}
+
+	// Previous versions did not support updated arguments and just set key to 1, so in these cases we should do nothing.
+	// In the future this can be deleted, as we will always be getting arguments from here
+	if string(rawJSON) == "1" {
+		return nil
+	}
+
+	// The job pulled off the queue was just a placeholder with no args, so replace it
+	jobWithArgs, err := newJob(rawJSON, job.dequeuedFrom, job.inProgQueue)
+	if err != nil {
+		logError("worker.delete_unique_job.updated_job", err)
+		return nil
+	}
+
+	return jobWithArgs
+}
+
+func (w *worker) RemoveJobFromInProgress(job *Job, fate terminateOp) {
 	conn := w.pool.Get()
 	defer conn.Close()
 
@@ -280,22 +358,22 @@ func (w *worker) removeJobFromInProgress(job *Job, fate terminateOp) {
 
 type terminateOp func(conn redis.Conn)
 
-func terminateOnly(_ redis.Conn) { return }
-func terminateAndRetry(w *worker, jt *jobType, job *Job) terminateOp {
+func TerminateOnly(_ redis.Conn) { return }
+func TerminateAndRetry(w *worker, jt *jobType, job *Job) terminateOp {
 	rawJSON, err := job.serialize()
 	if err != nil {
 		logError("worker.terminate_and_retry.serialize", err)
-		return terminateOnly
+		return TerminateOnly
 	}
 	return func(conn redis.Conn) {
 		conn.Send("ZADD", redisKeyRetry(w.namespace), nowEpochSeconds()+jt.calcBackoff(job), rawJSON)
 	}
 }
-func terminateAndDead(w *worker, job *Job) terminateOp {
+func TerminateAndDead(w *worker, job *Job) terminateOp {
 	rawJSON, err := job.serialize()
 	if err != nil {
 		logError("worker.terminate_and_dead.serialize", err)
-		return terminateOnly
+		return TerminateOnly
 	}
 	return func(conn redis.Conn) {
 		// NOTE: sidekiq limits the # of jobs: only keep jobs for 6 months, and only keep a max # of jobs
@@ -307,17 +385,17 @@ func terminateAndDead(w *worker, job *Job) terminateOp {
 	}
 }
 
-func (w *worker) jobFate(jt *jobType, job *Job) terminateOp {
+func (w *worker) JobFate(jt *jobType, job *Job) terminateOp {
 	if jt != nil {
 		failsRemaining := int64(jt.MaxFails) - job.Fails
 		if failsRemaining > 0 {
-			return terminateAndRetry(w, jt, job)
+			return TerminateAndRetry(w, jt, job)
 		}
 		if jt.SkipDead {
-			return terminateOnly
+			return TerminateOnly
 		}
 	}
-	return terminateAndDead(w, job)
+	return TerminateAndDead(w, job)
 }
 
 // Default algorithm returns an fastly increasing backoff counter which grows in an unbounded fashion
