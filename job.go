@@ -45,6 +45,18 @@ func newJob(rawJSON, dequeuedFrom, inProgQueue []byte) (*Job, error) {
 	return &job, nil
 }
 
+func (j *Job) GetRawJSON() string {
+	return string(j.rawJSON)
+}
+
+func (j *Job) GetDequeuedFrom() string {
+	return string(j.dequeuedFrom)
+}
+
+func (j *Job) GetInProgQueue() string {
+	return string(j.inProgQueue)
+}
+
 func (j *Job) serialize() ([]byte, error) {
 	return json.Marshal(j)
 }
