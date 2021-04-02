@@ -146,11 +146,38 @@ func (e *Enqueuer) EnqueueUniqueInByKey(jobName string, secondsFromNow int64, ar
 		Job:   job,
 	}
 
-	res, err := enqueue(&scheduledJob.RunAt)
-	if res == "ok" && err == nil {
-		return scheduledJob, nil
+	if scheduledJob.RunAt > time.Now().Unix(){
+		res, err := enqueue(&scheduledJob.RunAt)
+		if res == "ok" && err == nil {
+			return scheduledJob, nil
+		}
+		return nil, err
 	}
-	return nil, err
+
+
+	// job := &Job{
+	// 	Name:       jobName,
+	// 	ID:         makeIdentifier(),
+	// 	EnqueuedAt: nowEpochSeconds(),
+	// 	Args:       args,
+	// }
+	// job.EnqueuedAt = nowEpochSeconds()
+	rawJSON, err := job.serialize()
+	if err != nil {
+		return nil, err
+	}
+
+	conn := e.Pool.Get()
+	defer conn.Close()
+
+	if _, err := conn.Do("LPUSH", e.queuePrefix+jobName, rawJSON); err != nil {
+		return nil, err
+	}
+
+	if err := e.addToKnownJobs(conn, jobName); err != nil {
+		return nil, err
+	}
+	return scheduledJob, nil
 }
 
 func (e *Enqueuer) addToKnownJobs(conn redis.Conn, jobName string) error {

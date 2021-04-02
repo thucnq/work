@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="12880216-7755-473f-8420-6f51ec9a3638" name="Default Changelist" comment="" />
+    <list default="true" id="12880216-7755-473f-8420-6f51ec9a3638" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/cmd/workenqueueuniqueinbykey/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/custom_marshal.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/workfakedata/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/workfakedata/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/workwebui/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/workwebui/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enqueue.go" beforeDir="false" afterPath="$PROJECT_DIR$/enqueue.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/worker.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
   </component>
   <component name="GOROOT" path="/usr/local/go" />
   <component name="Git.Settings">
@@ -21,6 +36,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="go.import.settings.migrated" value="true" />
@@ -34,6 +50,22 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
   </component>
+  <component name="RunManager">
+    <configuration name="go build github.com/thucnq/work/cmd/workenqueueuniqueinbykey" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="work" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <filePath value="$PROJECT_DIR$/cmd/workenqueueuniqueinbykey/main.go" />
+      <package value="github.com/thucnq/work/cmd/workenqueueuniqueinbykey" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build github.com/thucnq/work/cmd/workenqueueuniqueinbykey" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
@@ -42,9 +74,29 @@
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
-    <state x="686" y="938" width="618" height="580" key="find.popup" timestamp="1613984577902">
+    <state width="1804" height="278" key="GridCell.Tab.0.bottom" timestamp="1617263168193">
       <screen x="70" y="673" width="1850" height="1053" />
     </state>
-    <state x="686" y="938" width="618" height="580" key="find.popup/70.673.1850.1053/1920.0.1080.1920@70.673.1850.1053" timestamp="1613984577902" />
+    <state width="1804" height="278" key="GridCell.Tab.0.bottom/70.673.1850.1053/1920.0.1080.1920@70.673.1850.1053" timestamp="1617263168193" />
+    <state width="1804" height="278" key="GridCell.Tab.0.center" timestamp="1617263168193">
+      <screen x="70" y="673" width="1850" height="1053" />
+    </state>
+    <state width="1804" height="278" key="GridCell.Tab.0.center/70.673.1850.1053/1920.0.1080.1920@70.673.1850.1053" timestamp="1617263168193" />
+    <state width="1804" height="278" key="GridCell.Tab.0.left" timestamp="1617263168193">
+      <screen x="70" y="673" width="1850" height="1053" />
+    </state>
+    <state width="1804" height="278" key="GridCell.Tab.0.left/70.673.1850.1053/1920.0.1080.1920@70.673.1850.1053" timestamp="1617263168193" />
+    <state width="1804" height="278" key="GridCell.Tab.0.right" timestamp="1617263168193">
+      <screen x="70" y="673" width="1850" height="1053" />
+    </state>
+    <state width="1804" height="278" key="GridCell.Tab.0.right/70.673.1850.1053/1920.0.1080.1920@70.673.1850.1053" timestamp="1617263168193" />
+    <state x="502" y="937" width="1252" height="580" key="find.popup" timestamp="1617339157491">
+      <screen x="70" y="673" width="1850" height="1053" />
+    </state>
+    <state x="502" y="937" width="1252" height="580" key="find.popup/70.673.1850.1053/1920.0.1080.1920@70.673.1850.1053" timestamp="1617339157491" />
+    <state x="658" y="905" width="672" height="678" key="search.everywhere.popup" timestamp="1617301106937">
+      <screen x="70" y="673" width="1850" height="1053" />
+    </state>
+    <state x="658" y="905" width="672" height="678" key="search.everywhere.popup/70.673.1850.1053/1920.0.1080.1920@70.673.1850.1053" timestamp="1617301106937" />
   </component>
 </project>

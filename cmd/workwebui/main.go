@@ -5,17 +5,15 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
 	"time"
 
-	"github.com/thucnq/work/webui"
 	"github.com/gomodule/redigo/redis"
+	"github.com/thucnq/work/webui"
 )
-
+//redis://:123456789@localhost:6379/0
 var (
-	redisHostPort  = flag.String("redis", ":6379", "redis hostport")
-	redisDatabase  = flag.String("database", "0", "redis database")
-	redisNamespace = flag.String("ns", "work", "redis namespace")
+	redisHostPort  = flag.String("redis", "redis://:123456789@localhost:6379/0", "redis hostport")
+	redisNamespace = flag.String("ns", "test_service", "redis namespace")
 	webHostPort    = flag.String("listen", ":5040", "hostport to listen for HTTP JSON API")
 )
 
@@ -24,17 +22,10 @@ func main() {
 
 	fmt.Println("Starting workwebui:")
 	fmt.Println("redis = ", *redisHostPort)
-	fmt.Println("database = ", *redisDatabase)
 	fmt.Println("namespace = ", *redisNamespace)
 	fmt.Println("listen = ", *webHostPort)
 
-	database, err := strconv.Atoi(*redisDatabase)
-	if err != nil {
-		fmt.Printf("Error: %v is not a valid database value", *redisDatabase)
-		return
-	}
-
-	pool := newPool(*redisHostPort, database)
+	pool := newPool(*redisHostPort)
 
 	server := webui.NewServer(*redisNamespace, pool, *webHostPort)
 	server.Start()
@@ -49,13 +40,13 @@ func main() {
 	fmt.Println("\nQuitting...")
 }
 
-func newPool(addr string, database int) *redis.Pool {
+func newPool(addr string) *redis.Pool {
 	return &redis.Pool{
 		MaxActive:   3,
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
-			return redis.DialURL(addr, redis.DialDatabase(database))
+			return redis.DialURL(addr)
 		},
 		Wait: true,
 	}

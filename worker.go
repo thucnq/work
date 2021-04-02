@@ -343,6 +343,7 @@ func (w *worker) UpdateUniqueJob(job *Job) *Job {
 }
 
 func (w *worker) RemoveJobFromInProgress(job *Job, fate terminateOp) {
+	fmt.Println("run RemoveJobFromInProgress rawJSON", string(job.rawJSON))
 	conn := w.pool.Get()
 	defer conn.Close()
 
@@ -354,6 +355,9 @@ func (w *worker) RemoveJobFromInProgress(job *Job, fate terminateOp) {
 	if _, err := conn.Do("EXEC"); err != nil {
 		logError("worker.remove_job_from_in_progress.lrem", err)
 	}
+	// if _, err := conn.Do("LREM", job.inProgQueue, 1, job.rawJSON); err != nil {
+	// 	logError("worker.remove_job_from_in_progress.lrem", err)
+	// }
 }
 
 type terminateOp func(conn redis.Conn)

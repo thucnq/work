@@ -14,9 +14,8 @@ var redisHostPort = flag.String("redis", ":6379", "redis hostport")
 var redisNamespace = flag.String("ns", "work", "redis namespace")
 
 func epsilonHandler(job *work.Job) error {
-	fmt.Println("epsilon")
+	fmt.Println("epsilon", job)
 	time.Sleep(time.Second)
-
 	if rand.Intn(2) == 0 {
 		return fmt.Errorf("random error")
 	}
@@ -40,18 +39,16 @@ func main() {
 	}()
 
 	go func() {
-		for {
 			en := work.NewEnqueuer(*redisNamespace, pool)
-			for i := 0; i < 20; i++ {
-				en.Enqueue("foobar", work.Q{"i": i})
+			for i := 0; i < 5; i++ {
+				en.EnqueueUniqueInByKey("olala", 200,  work.Q{"i": i}, map[string]interface{}{"key": i})
+				time.Sleep(1 * time.Second)
 			}
 
-			time.Sleep(1 * time.Second)
-		}
 	}()
 
 	wp := work.NewWorkerPool(context{}, 5, *redisNamespace, pool)
-	wp.Job("foobar", epsilonHandler)
+	wp.Job("olala", epsilonHandler)
 	wp.Start()
 
 	select {}
